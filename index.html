@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Instagram Reel Q&A</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f4f6f9;
+      padding: 40px;
+      max-width: 700px;
+      margin: auto;
+    }
+
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 12px;
+      font-size: 16px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      box-sizing: border-box;
+      margin-top: 20px;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      font-size: 16px;
+      margin-top: 10px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+
+    .qa-box {
+      background-color: #fff;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      padding: 20px;
+      margin-top: 20px;
+    }
+
+    .qa-pair {
+      margin-bottom: 20px;
+      border-left: 4px solid #4CAF50;
+      padding-left: 15px;
+    }
+
+    .qa-pair strong {
+      display: block;
+      margin-bottom: 5px;
+      color: #2e7d32;
+    }
+
+    .error {
+      color: red;
+      margin-top: 20px;
+    }
+
+    .processing {
+      color: #888;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Instagram Reel Q&A Extractor</h1>
+
+  <input id="reel-url" type="text" placeholder="Paste Instagram Reel URL here">
+  <button onclick="submitReel()">Get Answers</button>
+
+  <div id="output" class="qa-box"></div>
+
+  <script>
+    async function submitReel() {
+      const url = document.getElementById("reel-url").value;
+      const output = document.getElementById("output");
+      output.innerHTML = `<p class="processing">Processing...</p>`;
+
+      try {
+        const response = await fetch('/process', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url })
+        });
+
+        const data = await response.json();
+
+        if (data.error) {
+          output.innerHTML = `<p class="error">${data.error}</p>`;
+        } else if (Array.isArray(data)) {
+          output.innerHTML = `<h3>Questions & Answers</h3>`;
+          data.forEach(item => {
+            output.innerHTML += `
+              <div class="qa-pair">
+                <strong>Q:</strong> ${item.question}
+                <strong>A:</strong> ${item.answer}
+              </div>
+            `;
+          });
+        } else {
+          output.innerHTML = `<p class="error">Unexpected response format.</p>`;
+        }
+
+      } catch (err) {
+        output.innerHTML = `<p class="error">Request failed: ${err.message}</p>`;
+      }
+    }
+  </script>
+
+</body>
+</html>
